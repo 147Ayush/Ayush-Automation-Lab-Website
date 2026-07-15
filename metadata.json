@@ -1,0 +1,6 @@
+{
+  "name": "Ayush Automation Lab",
+  "description": "Custom development and intelligent automation solutions built with surgical precision.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
