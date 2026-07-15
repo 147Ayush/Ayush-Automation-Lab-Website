@@ -64,9 +64,12 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
 
     try {
       // 1. Send via EmailJS
-      const serviceId = (import.meta as any).env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet11';
-      const templateId = (import.meta as any).env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g81';
-      const publicKey = (import.meta as any).env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk822';
+      // @ts-ignore
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet';
+      // @ts-ignore
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g';
+      // @ts-ignore
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk';
 
       const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
@@ -81,16 +84,57 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
             from_email: email,
             from_phone: fullPhone,
             message: `Service Requested: ${serviceTitle}\n\nClient Requirements:\n${requirements}`,
+            
+            // Additional fallback parameters to map cleanly to custom templates
+            name: name,
+            email: email,
+            phone: fullPhone,
+            phone_number: fullPhone,
+            message_html: `Service Requested: ${serviceTitle}\n\nClient Requirements:\n${requirements}`,
+            service_type: serviceTitle,
+            service: serviceTitle,
+            requirements: requirements,
+            reply_to: email,
+
+            // Recipient routing fallbacks in case template uses dynamic recipient email
+            to_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            admin_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            recipient_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            receiver_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            owner_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            email_to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            recipient: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+
+            // Multi-variable fallbacks for client info in templates
+            client_name: name,
+            customer_name: name,
+            user_name: name,
+            sender_name: name,
+            client_email: email,
+            customer_email: email,
+            user_email: email,
+            sender_email: email,
+            client_phone: fullPhone,
+            customer_phone: fullPhone,
+            user_phone: fullPhone,
+            contact_number: fullPhone,
+            comments: `Service Requested: ${serviceTitle}\n\nClient Requirements:\n${requirements}`,
+            notes: `Service Requested: ${serviceTitle}\n\nClient Requirements:\n${requirements}`,
+            details: `Service Requested: ${serviceTitle}\n\nClient Requirements:\n${requirements}`,
           }
         })
       });
 
       if (!emailJsResponse.ok) {
-        console.error('EmailJS request failed for service inquiry:', await emailJsResponse.text());
+        const errText = await emailJsResponse.text();
+        console.error('EmailJS request failed for service inquiry:', errText);
+        throw new Error(errText);
       }
 
       // Send auto-reply template to client if available
-      const autoReplyTemplateId = (import.meta as any).env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk87';
+      // @ts-ignore
+      const autoReplyTemplateId = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk';
       if (autoReplyTemplateId) {
         await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
@@ -102,19 +146,26 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
             template_params: {
               to_name: name,
               to_email: email,
-              reply_to: 'ayushsoni07@ayushautomationlab.com',
+              reply_to: 'ayushsoni07@ayushautomation.com',
+              
+              // Fallbacks
+              name: name,
+              email: email,
             }
           })
         }).catch(err => console.error('Auto-reply failed for service inquiry:', err));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('EmailJS service inquiry failure:', err);
+      setError(`Email sending error: ${err.message || err}. (Your inquiry is still being sent to Telegram)`);
     }
 
     try {
       // 2. Send via Telegram Bot API
-      const telegramBotToken = (import.meta as any).env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
-      const telegramChatId = (import.meta as any).env.VITE_TELEGRAM_CHAT_ID || '883445327';
+      // @ts-ignore
+      const telegramBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
+      // @ts-ignore
+      const telegramChatId = import.meta.env.VITE_TELEGRAM_CHAT_ID || '883445327';
 
       const telegramText = `<b>🛠️ New Service Requirements Received!</b>\n\n` +
         `<b>👤 Client Name:</b> ${name}\n` +

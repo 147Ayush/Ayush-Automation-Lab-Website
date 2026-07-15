@@ -115,9 +115,12 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
 
     try {
       // 1. Send via EmailJS
-      const serviceId = (import.meta as any).env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet11';
-      const templateId = (import.meta as any).env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g81';
-      const publicKey = (import.meta as any).env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk822';
+      // @ts-ignore
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet';
+      // @ts-ignore
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g';
+      // @ts-ignore
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk';
 
       const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
@@ -132,16 +135,58 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
             from_email: email,
             from_phone: phone,
             message: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
+
+            // Additional fallback parameters for common custom templates
+            name: name,
+            email: email,
+            phone: phone,
+            phone_number: phone,
+            message_html: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
+            service_type: serviceType,
+            service: serviceType,
+            date: date,
+            time: timeSlot,
+            time_slot: timeSlot,
+            company: company,
+            notes: notes,
+            reply_to: email,
+
+            // Multi-variable fallbacks for client info in templates
+            client_name: name,
+            customer_name: name,
+            user_name: name,
+            sender_name: name,
+            client_email: email,
+            customer_email: email,
+            user_email: email,
+            sender_email: email,
+            client_phone: phone,
+            customer_phone: phone,
+            user_phone: phone,
+            contact_number: phone,
+
+            // Recipient routing fallbacks in case template uses dynamic recipient email
+            to_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            admin_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            recipient_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            receiver_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            owner_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            email_to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            recipient: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
           }
         })
       });
 
       if (!emailJsResponse.ok) {
-        console.error('EmailJS booking notification failed:', await emailJsResponse.text());
+        const errText = await emailJsResponse.text();
+        console.error('EmailJS booking notification failed:', errText);
+        throw new Error(errText);
       }
 
       // Also send auto-reply to client
-      const autoReplyTemplateId = (import.meta as any).env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk87';
+      // @ts-ignore
+      const autoReplyTemplateId = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk';
       if (autoReplyTemplateId) {
         await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
@@ -153,19 +198,26 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
             template_params: {
               to_name: name,
               to_email: email,
-              reply_to: 'ayushsoni07@ayushautomationlab.com',
+              reply_to: 'ayushsoni07@ayushautomation.com',
+
+              // Fallbacks
+              name: name,
+              email: email,
             }
           })
         }).catch(err => console.error('Auto-reply failed:', err));
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('EmailJS booking general failure:', err);
+      setError(`Email sending error: ${err.message || err}. (Your booking is still being sent to Telegram)`);
     }
 
     try {
       // 2. Send via Telegram Bot API
-      const telegramBotToken = (import.meta as any).env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
-      const telegramChatId = (import.meta as any).env.VITE_TELEGRAM_CHAT_ID || '883445327';
+      // @ts-ignore
+      const telegramBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
+      // @ts-ignore
+      const telegramChatId = import.meta.env.VITE_TELEGRAM_CHAT_ID || '883445327';
 
       const telegramText = `<b>📅 New Consultation Booking Secured!</b>\n\n` +
         `<b>👤 Client:</b> ${name}\n` +
