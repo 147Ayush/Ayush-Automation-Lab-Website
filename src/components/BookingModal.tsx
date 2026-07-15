@@ -86,7 +86,7 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
     setStep((prev) => Math.max(1, prev - 1));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateStep(3)) return;
 
@@ -112,6 +112,87 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
 
     // Dispatch custom event to notify components
     window.dispatchEvent(new Event('bookings-updated'));
+
+    try {
+      // 1. Send via EmailJS
+      const serviceId = (import.meta as any).env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet11';
+      const templateId = (import.meta as any).env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g81';
+      const publicKey = (import.meta as any).env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk822';
+
+      const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: serviceId,
+          template_id: templateId,
+          user_id: publicKey,
+          template_params: {
+            to_name: 'Ayush',
+            from_name: name,
+            from_email: email,
+            from_phone: phone,
+            message: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
+          }
+        })
+      });
+
+      if (!emailJsResponse.ok) {
+        console.error('EmailJS booking notification failed:', await emailJsResponse.text());
+      }
+
+      // Also send auto-reply to client
+      const autoReplyTemplateId = (import.meta as any).env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk87';
+      if (autoReplyTemplateId) {
+        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: serviceId,
+            template_id: autoReplyTemplateId,
+            user_id: publicKey,
+            template_params: {
+              to_name: name,
+              to_email: email,
+              reply_to: 'ayushsoni07@ayushautomationlab.com',
+            }
+          })
+        }).catch(err => console.error('Auto-reply failed:', err));
+      }
+    } catch (err) {
+      console.error('EmailJS booking general failure:', err);
+    }
+
+    try {
+      // 2. Send via Telegram Bot API
+      const telegramBotToken = (import.meta as any).env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
+      const telegramChatId = (import.meta as any).env.VITE_TELEGRAM_CHAT_ID || '883445327';
+
+      const telegramText = `<b>📅 New Consultation Booking Secured!</b>\n\n` +
+        `<b>👤 Client:</b> ${name}\n` +
+        `<b>✉️ Email:</b> ${email}\n` +
+        `<b>📞 Phone:</b> ${phone}\n` +
+        `<b>🏢 Company:</b> ${company || 'N/A'}\n` +
+        `<b>🛠️ Service:</b> ${serviceType}\n` +
+        `<b>📆 Date:</b> ${date}\n` +
+        `<b>⏰ Time:</b> ${timeSlot}\n\n` +
+        `<b>📝 Notes:</b>\n${notes || 'None'}`;
+
+      const telegramResponse = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: telegramChatId,
+          text: telegramText,
+          parse_mode: 'HTML'
+        })
+      });
+
+      if (!telegramResponse.ok) {
+        console.error('Telegram dispatch failed:', await telegramResponse.text());
+      }
+    } catch (err) {
+      console.error('Telegram dispatch failure:', err);
+    }
 
     setIsSubmitted(true);
   };

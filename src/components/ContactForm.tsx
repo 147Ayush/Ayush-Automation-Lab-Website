@@ -1,6 +1,5 @@
 import { useState, FormEvent } from 'react';
 import { Mail, MapPin, Send, Check, Phone, ArrowUpRight } from 'lucide-react';
-import emailjs from '@emailjs/browser';
 import { ContactMessage } from '../types';
 
 const COUNTRY_CODES = [
@@ -38,75 +37,110 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
     setError('');
     setIsSubmitting(true);
 
+    const fullPhone = `${countryCode} ${phone}`;
+
     const newMessage: ContactMessage = {
       id: `msg-${Date.now()}`,
       name,
       email,
-      phone: `${countryCode} ${phone}`,
+      phone: fullPhone,
       message,
       createdAt: new Date().toISOString()
     };
 
-    // Keep a local copy too (handy for the founder dashboard / history)
+    // Save message to localStorage
     const existing = localStorage.getItem('contact_messages');
     const messages = existing ? JSON.parse(existing) : [];
     messages.push(newMessage);
     localStorage.setItem('contact_messages', JSON.stringify(messages));
+
+    // Dispatch custom event to notify components
     window.dispatchEvent(new Event('messages-updated'));
 
     try {
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
-      const autoReplyTemplateId = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID as string;
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
+      // 1. Send via EmailJS
+      const serviceId = (import.meta as any).env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet11';
+      const templateId = (import.meta as any).env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g81';
+      const publicKey = (import.meta as any).env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk822';
 
-      if (!serviceId || !templateId || !publicKey) {
-        throw new Error('EmailJS is not configured. Add VITE_EMAILJS_* keys to your .env file.');
+      const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: serviceId,
+          template_id: templateId,
+          user_id: publicKey,
+          template_params: {
+            to_name: 'Ayush',
+            from_name: name,
+            from_email: email,
+            from_phone: fullPhone,
+            message: message,
+          }
+        })
+      });
+
+      if (!emailJsResponse.ok) {
+        console.error('EmailJS request failed:', await emailJsResponse.text());
       }
 
-      // 1) Notify Ayush that a new message came in
-      const notifyAyush = emailjs.send(
-        serviceId,
-        templateId,
-        {
-          from_name: name,
-          from_email: email,
-          phone: `${countryCode} ${phone}`,
-          message,
-          to_email: 'ayushsoni07@ayushautomationlab.com',
-        },
-        { publicKey }
-      );
-
-      // 2) Auto-reply confirmation back to the client (only if that
-      // template is configured — safe to skip otherwise)
-      const notifyClient = autoReplyTemplateId
-        ? emailjs.send(
-            serviceId,
-            autoReplyTemplateId,
-            {
+      // Also send auto-reply to client if template specified
+      const autoReplyTemplateId = (import.meta as any).env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk87';
+      if (autoReplyTemplateId) {
+        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: serviceId,
+            template_id: autoReplyTemplateId,
+            user_id: publicKey,
+            template_params: {
               to_name: name,
               to_email: email,
-              from_name: 'Ayush Automation Lab',
-            },
-            { publicKey }
-          )
-        : Promise.resolve();
-
-      await Promise.all([notifyAyush, notifyClient]);
-
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setName('');
-      setEmail('');
-      setCountryCode('+91');
-      setPhone('');
-      setMessage('');
+              reply_to: 'ayushsoni07@ayushautomationlab.com',
+            }
+          })
+        }).catch(err => console.error('Auto-reply failed:', err));
+      }
     } catch (err) {
-      console.error('Contact form submit error:', err);
-      setIsSubmitting(false);
-      setError('Something went wrong sending your message. Please try again or email us directly.');
+      console.error('EmailJS general failure:', err);
     }
+
+    try {
+      // 2. Send via Telegram Bot API
+      const telegramBotToken = (import.meta as any).env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
+      const telegramChatId = (import.meta as any).env.VITE_TELEGRAM_CHAT_ID || '883445327';
+
+      const telegramText = `<b>🆕 New Contact Form Submission</b>\n\n` +
+        `<b>👤 Name:</b> ${name}\n` +
+        `<b>✉️ Email:</b> ${email}\n` +
+        `<b>📞 Phone:</b> ${fullPhone}\n\n` +
+        `<b>💬 Message:</b>\n${message}`;
+
+      const telegramResponse = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: telegramChatId,
+          text: telegramText,
+          parse_mode: 'HTML'
+        })
+      });
+
+      if (!telegramResponse.ok) {
+        console.error('Telegram dispatch failed:', await telegramResponse.text());
+      }
+    } catch (err) {
+      console.error('Telegram dispatch failure:', err);
+    }
+
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    setName('');
+    setEmail('');
+    setCountryCode('+91');
+    setPhone('');
+    setMessage('');
   };
 
   const handleContactSalesClick = () => {
@@ -205,7 +239,7 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
                 </div>
                 <h3 className="font-space font-bold text-xl text-on-surface">Message Received!</h3>
                 <p className="text-xs text-on-surface-variant max-w-sm mt-2 leading-relaxed">
-                  Thank you for reaching out. We have logged your message and dispatched an automatic alert to our inbox. We'll be in touch shortly!
+                  Thank you for reaching out. We have logged your message into our queue and dispatched an automatic alert to our slack. We'll be in touch shortly!
                 </p>
                 <button
                   type="button"

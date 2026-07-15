@@ -16,12 +16,12 @@ export default function Footer({ onOpenBooking }: FooterProps) {
   };
 
   const socialLinks = [
-    { name: 'Instagram', icon: <Instagram className="h-5 w-5" />, href: 'https://instagram.com', color: 'hover:text-[#E1306C] hover:bg-[#E1306C]/10 hover:border-[#E1306C]/30' },
-    { name: 'YouTube', icon: <Youtube className="h-5 w-5" />, href: 'https://youtube.com', color: 'hover:text-[#FF0000] hover:bg-[#FF0000]/10 hover:border-[#FF0000]/30' },
-    { name: 'Twitter / X', icon: <Twitter className="h-5 w-5" />, href: 'https://x.com', color: 'hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/30' },
-    { name: 'Threads', icon: <Fingerprint className="h-5 w-5" />, href: 'https://threads.net', color: 'hover:text-[#000000] hover:bg-[#000000]/10 hover:border-[#000000]/30' },
-    { name: 'LinkedIn', icon: <Linkedin className="h-5 w-5" />, href: 'https://linkedin.com', color: 'hover:text-[#0077B5] hover:bg-[#0077B5]/10 hover:border-[#0077B5]/30' },
-    { name: 'GitHub', icon: <Github className="h-5 w-5" />, href: 'https://github.com', color: 'hover:text-[#333] hover:bg-[#333]/10 hover:border-[#333]/30' }
+    { name: 'Instagram', icon: <Instagram className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_INSTAGRAM || 'https://instagram.com', color: 'hover:text-[#E1306C] hover:bg-[#E1306C]/10 hover:border-[#E1306C]/30' },
+    { name: 'YouTube', icon: <Youtube className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_YOUTUBE || 'https://youtube.com', color: 'hover:text-[#FF0000] hover:bg-[#FF0000]/10 hover:border-[#FF0000]/30' },
+    { name: 'Twitter / X', icon: <Twitter className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_TWITTER || 'https://x.com', color: 'hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10 hover:border-[#1DA1F2]/30' },
+    { name: 'Threads', icon: <Fingerprint className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_THREADS || 'https://threads.net', color: 'hover:text-[#000000] hover:bg-[#000000]/10 hover:border-[#000000]/30' },
+    { name: 'LinkedIn', icon: <Linkedin className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_LINKEDIN || 'https://linkedin.com', color: 'hover:text-[#0077B5] hover:bg-[#0077B5]/10 hover:border-[#0077B5]/30' },
+    { name: 'GitHub', icon: <Github className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_GITHUB || 'https://github.com', color: 'hover:text-[#333] hover:bg-[#333]/10 hover:border-[#333]/30' }
   ];
 
   return (

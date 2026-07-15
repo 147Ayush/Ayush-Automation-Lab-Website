@@ -3,9 +3,10 @@ import { Menu, X, Bot, Calendar, Sparkles } from 'lucide-react';
 
 interface NavbarProps {
   onOpenBooking: () => void;
+  onOpenAIChat: () => void;
 }
 
-export default function Navbar({ onOpenBooking }: NavbarProps) {
+export default function Navbar({ onOpenBooking, onOpenAIChat }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 

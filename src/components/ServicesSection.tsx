@@ -4,21 +4,14 @@ import { Globe, Cpu, Settings, Check, ArrowRight, DollarSign, Clock, ChevronRigh
 import { SERVICES } from '../data';
 import { Service } from '../types';
 import ThreeDCard from './ThreeDCard';
-import { sendTelegramNotification } from '../lib/telegram';
 
 interface ServicesSectionProps {
   onOpenBooking: (serviceName: string) => void;
+  onSelectService: (service: Service) => void;
 }
 
-export default function ServicesSection({ onOpenBooking }: ServicesSectionProps) {
+export default function ServicesSection({ onOpenBooking, onSelectService }: ServicesSectionProps) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-
-  const handleServiceClick = (service: Service) => {
-    setSelectedService(service);
-    sendTelegramNotification(
-      `<b>New service interest</b>\nSomeone viewed: <b>${service.title}</b>\n${service.description}`
-    );
-  };
   
   // States for Calculator
   const [complexity, setComplexity] = useState<'standard' | 'advanced' | 'enterprise'>('advanced');
@@ -102,7 +95,7 @@ export default function ServicesSection({ onOpenBooking }: ServicesSectionProps)
             End-to-End Development &amp; Automation
           </h2>
           <p className="text-sm text-on-surface-variant mt-2 max-w-xl font-medium">
-            Click any service block below to see the full scope, tech stack, and an instant price &amp; timeline estimate.
+            Click any service block below to launch our interactive project blueprint form and share your scope specifications with us.
           </p>
         </div>
 
@@ -111,7 +104,7 @@ export default function ServicesSection({ onOpenBooking }: ServicesSectionProps)
           {SERVICES.map((service) => (
             <ThreeDCard
               key={service.id}
-              onClick={() => handleServiceClick(service)}
+              onClick={() => onSelectService(service)}
               className="bg-white p-8 rounded-[24px] shadow-[0px_8px_30px_rgba(0,0,0,0.02)] border-2 border-outline-variant/30 hover:shadow-lg transition-all cursor-pointer"
               id={`service-card-${service.id}`}
             >
@@ -129,7 +122,7 @@ export default function ServicesSection({ onOpenBooking }: ServicesSectionProps)
                 </div>
 
                 <div className="mt-8 flex items-center text-primary font-bold text-xs group">
-                  <span>View Details &amp; Pricing</span>
+                  <span>Inquire &amp; Request Blueprint</span>
                   <ChevronRight className="h-4 w-4 ml-1 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
