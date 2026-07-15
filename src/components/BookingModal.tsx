@@ -33,6 +33,7 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
   const [timeSlot, setTimeSlot] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   // Handle service pre-loads on change of initialService
@@ -90,163 +91,174 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
     e.preventDefault();
     if (!validateStep(3)) return;
 
-    const newBooking: Consultation = {
-      id: `booking-${Date.now()}`,
-      name,
-      email,
-      phone,
-      company,
-      serviceType,
-      date,
-      timeSlot,
-      notes,
-      status: 'confirmed',
-      createdAt: new Date().toISOString()
-    };
-
-    // Save to localStorage
-    const existing = localStorage.getItem('booked_consultations');
-    const bookings = existing ? JSON.parse(existing) : [];
-    bookings.push(newBooking);
-    localStorage.setItem('booked_consultations', JSON.stringify(bookings));
-
-    // Dispatch custom event to notify components
-    window.dispatchEvent(new Event('bookings-updated'));
+    setIsSubmitting(true);
+    const animationPromise = new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
-      // 1. Send via EmailJS
-      // @ts-ignore
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet';
-      // @ts-ignore
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g';
-      // @ts-ignore
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk';
+      const newBooking: Consultation = {
+        id: `booking-${Date.now()}`,
+        name,
+        email,
+        phone,
+        company,
+        serviceType,
+        date,
+        timeSlot,
+        notes,
+        status: 'confirmed',
+        createdAt: new Date().toISOString()
+      };
 
-      const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service_id: serviceId,
-          template_id: templateId,
-          user_id: publicKey,
-          template_params: {
-            to_name: 'Ayush',
-            from_name: name,
-            from_email: email,
-            from_phone: phone,
-            message: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
+      // Save to localStorage
+      const existing = localStorage.getItem('booked_consultations');
+      const bookings = existing ? JSON.parse(existing) : [];
+      bookings.push(newBooking);
+      localStorage.setItem('booked_consultations', JSON.stringify(bookings));
 
-            // Additional fallback parameters for common custom templates
-            name: name,
-            email: email,
-            phone: phone,
-            phone_number: phone,
-            message_html: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
-            service_type: serviceType,
-            service: serviceType,
-            date: date,
-            time: timeSlot,
-            time_slot: timeSlot,
-            company: company,
-            notes: notes,
-            reply_to: email,
+      // Dispatch custom event to notify components
+      window.dispatchEvent(new Event('bookings-updated'));
 
-            // Multi-variable fallbacks for client info in templates
-            client_name: name,
-            customer_name: name,
-            user_name: name,
-            sender_name: name,
-            client_email: email,
-            customer_email: email,
-            user_email: email,
-            sender_email: email,
-            client_phone: phone,
-            customer_phone: phone,
-            user_phone: phone,
-            contact_number: phone,
+      try {
+        // 1. Send via EmailJS
+        // @ts-ignore
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_483zuet';
+        // @ts-ignore
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_falew1g';
+        // @ts-ignore
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'eaBtfsmeqETchmYNk';
 
-            // Recipient routing fallbacks in case template uses dynamic recipient email
-            to_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            admin_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            receiver_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            owner_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            email_to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-          }
-        })
-      });
-
-      if (!emailJsResponse.ok) {
-        const errText = await emailJsResponse.text();
-        console.error('EmailJS booking notification failed:', errText);
-        throw new Error(errText);
-      }
-
-      // Also send auto-reply to client
-      // @ts-ignore
-      const autoReplyTemplateId = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk';
-      if (autoReplyTemplateId) {
-        await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        const emailJsResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             service_id: serviceId,
-            template_id: autoReplyTemplateId,
+            template_id: templateId,
             user_id: publicKey,
             template_params: {
-              to_name: name,
-              to_email: email,
-              reply_to: 'ayushsoni07@ayushautomation.com',
+              to_name: 'Ayush',
+              from_name: name,
+              from_email: email,
+              from_phone: phone,
+              message: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
 
-              // Fallbacks
+              // Additional fallback parameters for common custom templates
               name: name,
               email: email,
+              phone: phone,
+              phone_number: phone,
+              message_html: `Consultation Booking Scheduled:\nDate: ${date}\nTime: ${timeSlot}\nService: ${serviceType}\nCompany: ${company || 'N/A'}\nNotes: ${notes || 'None'}`,
+              service_type: serviceType,
+              service: serviceType,
+              date: date,
+              time: timeSlot,
+              time_slot: timeSlot,
+              company: company,
+              notes: notes,
+              reply_to: email,
+
+              // Multi-variable fallbacks for client info in templates
+              client_name: name,
+              customer_name: name,
+              user_name: name,
+              sender_name: name,
+              client_email: email,
+              customer_email: email,
+              user_email: email,
+              sender_email: email,
+              client_phone: phone,
+              customer_phone: phone,
+              user_phone: phone,
+              contact_number: phone,
+
+              // Recipient routing fallbacks in case template uses dynamic recipient email
+              to_email: 'ayushsoni07@ayushautomation.com',
+              to: 'ayushsoni07@ayushautomation.com',
+              admin_email: 'ayushsoni07@ayushautomation.com',
+              recipient_email: 'ayushsoni07@ayushautomation.com',
+              receiver_email: 'ayushsoni07@ayushautomation.com',
+              owner_email: 'ayushsoni07@ayushautomation.com',
+              email_to: 'ayushsoni07@ayushautomation.com',
+              recipient: 'ayushsoni07@ayushautomation.com',
             }
           })
-        }).catch(err => console.error('Auto-reply failed:', err));
+        });
+
+        if (!emailJsResponse.ok) {
+          const errText = await emailJsResponse.text();
+          console.error('EmailJS booking notification failed:', errText);
+          throw new Error(errText);
+        }
+
+        // Also send auto-reply to client
+        // @ts-ignore
+        const autoReplyTemplateId = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID || 'template_td359vk';
+        if (autoReplyTemplateId) {
+          await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              service_id: serviceId,
+              template_id: autoReplyTemplateId,
+              user_id: publicKey,
+              template_params: {
+                to_name: name,
+                to_email: email,
+                reply_to: 'ayushsoni07@ayushautomation.com',
+
+                // Fallbacks
+                name: name,
+                email: email,
+              }
+            })
+          }).catch(err => console.error('Auto-reply failed:', err));
+        }
+      } catch (err: any) {
+        console.error('EmailJS booking general failure:', err);
+        setError(`Email sending error: ${err.message || err}. (Your booking is still being sent to Telegram)`);
       }
-    } catch (err: any) {
-      console.error('EmailJS booking general failure:', err);
-      setError(`Email sending error: ${err.message || err}. (Your booking is still being sent to Telegram)`);
-    }
 
-    try {
-      // 2. Send via Telegram Bot API
-      // @ts-ignore
-      const telegramBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
-      // @ts-ignore
-      const telegramChatId = import.meta.env.VITE_TELEGRAM_CHAT_ID || '883445327';
+      try {
+        // 2. Send via Telegram Bot API
+        // @ts-ignore
+        const telegramBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || '8374027412:AAHNBzY0SU3UKdGWG6-FvUPS80Po52u-6Y7';
+        // @ts-ignore
+        const telegramChatId = import.meta.env.VITE_TELEGRAM_CHAT_ID || '883445327';
 
-      const telegramText = `<b>📅 New Consultation Booking Secured!</b>\n\n` +
-        `<b>👤 Client:</b> ${name}\n` +
-        `<b>✉️ Email:</b> ${email}\n` +
-        `<b>📞 Phone:</b> ${phone}\n` +
-        `<b>🏢 Company:</b> ${company || 'N/A'}\n` +
-        `<b>🛠️ Service:</b> ${serviceType}\n` +
-        `<b>📆 Date:</b> ${date}\n` +
-        `<b>⏰ Time:</b> ${timeSlot}\n\n` +
-        `<b>📝 Notes:</b>\n${notes || 'None'}`;
+        const telegramText = `<b>📅 New Consultation Booking Secured!</b>\n\n` +
+          `<b>👤 Client:</b> ${name}\n` +
+          `<b>✉️ Email:</b> ${email}\n` +
+          `<b>📞 Phone:</b> ${phone}\n` +
+          `<b>🏢 Company:</b> ${company || 'N/A'}\n` +
+          `<b>🛠️ Service:</b> ${serviceType}\n` +
+          `<b>📆 Date:</b> ${date}\n` +
+          `<b>⏰ Time:</b> ${timeSlot}\n\n` +
+          `<b>📝 Notes:</b>\n${notes || 'None'}`;
 
-      const telegramResponse = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: telegramChatId,
-          text: telegramText,
-          parse_mode: 'HTML'
-        })
-      });
+        const telegramResponse = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: telegramChatId,
+            text: telegramText,
+            parse_mode: 'HTML'
+          })
+        });
 
-      if (!telegramResponse.ok) {
-        console.error('Telegram dispatch failed:', await telegramResponse.text());
+        if (!telegramResponse.ok) {
+          console.error('Telegram dispatch failed:', await telegramResponse.text());
+        }
+      } catch (err) {
+        console.error('Telegram dispatch failure:', err);
       }
+
+      // Wait for at least the full animation length before completing
+      await animationPromise;
+      setIsSubmitted(true);
     } catch (err) {
-      console.error('Telegram dispatch failure:', err);
+      console.error('Submit error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitted(true);
   };
 
   const resetForm = () => {
@@ -260,6 +272,7 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
     setTimeSlot('');
     setNotes('');
     setIsSubmitted(false);
+    setIsSubmitting(false);
     setError('');
   };
 
@@ -303,7 +316,24 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
                 <X className="h-5 w-5" />
               </button>
 
-              {!isSubmitted ? (
+              {isSubmitting ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center text-center py-12"
+                >
+                  <div className="relative w-20 h-20 mb-8 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/20 animate-ping" />
+                    <div className="w-16 h-16 rounded-full border-4 border-primary/15 border-t-primary animate-spin" />
+                  </div>
+                  <h2 className="font-space text-2xl font-bold text-on-surface mb-2">
+                    Submitting Request...
+                  </h2>
+                  <p className="text-sm text-on-surface-variant max-w-sm leading-relaxed font-medium">
+                    We are registering your consultation details with our secure automation engine. Please hold on a moment...
+                  </p>
+                </motion.div>
+              ) : !isSubmitted ? (
                 <>
                   <div className="mb-6">
                     <span className="text-primary font-space text-[10px] font-bold uppercase tracking-widest block mb-1">
@@ -576,7 +606,7 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
                     Consultation Secured!
                   </h2>
                   <p className="text-sm text-on-surface-variant max-w-sm mb-6 leading-relaxed">
-                    Thank you, <span className="font-semibold text-on-surface">{name}</span>. We have reserved <span className="font-semibold text-on-surface">{timeSlot}</span> on <span className="font-semibold text-on-surface">{date}</span> for your strategy audit. A confirmation text has been logged for <span className="font-semibold text-on-surface">{phone}</span> and email dispatched to <span className="font-semibold text-on-surface">{email}</span>.
+                    Thank you, <span className="font-semibold text-on-surface">{name}</span>. We have received your consultation details for <span className="font-semibold text-on-surface">{timeSlot}</span> on <span className="font-semibold text-on-surface">{date}</span>. We will check slot availability; if it is available we will book your consultation, and if not possible in your requested slot, we will inform you and suggest a different slot. A confirmation log has been prepared for <span className="font-semibold text-on-surface">{phone}</span> and details sent to <span className="font-semibold text-on-surface">{email}</span>.
                   </p>
                   <button
                     onClick={handleCloseClick}

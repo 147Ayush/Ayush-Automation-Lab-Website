@@ -106,14 +106,14 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
             details: message,
 
             // Recipient routing fallbacks in case template uses dynamic recipient email
-            to_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            admin_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            receiver_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            owner_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            email_to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            to_email: 'ayushsoni07@ayushautomation.com',
+            to: 'ayushsoni07@ayushautomation.com',
+            admin_email: 'ayushsoni07@ayushautomation.com',
+            recipient_email: 'ayushsoni07@ayushautomation.com',
+            receiver_email: 'ayushsoni07@ayushautomation.com',
+            owner_email: 'ayushsoni07@ayushautomation.com',
+            email_to: 'ayushsoni07@ayushautomation.com',
+            recipient: 'ayushsoni07@ayushautomation.com',
           }
         })
       });
@@ -229,12 +229,6 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
             >
               Schedule My Audit
             </button>
-            <button
-              onClick={handleContactSalesClick}
-              className="border-2 border-white/35 text-white px-8 py-3.5 rounded-full font-bold text-sm hover:bg-white/10 transition-all text-center active:scale-95 cursor-pointer"
-            >
-              Contact Sales
-            </button>
           </div>
         </div>
       </section>
@@ -262,7 +256,7 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Email</p>
-                  <p className="text-sm font-semibold text-on-surface">ayushsoni07@ayushautomationlab.com</p>
+                  <p className="text-sm font-semibold text-on-surface">ayushsoni07@ayushautomation.com</p>
                 </div>
               </div>
 

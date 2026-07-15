@@ -1,20 +1,6 @@
-import { MouseEvent } from 'react';
-import { Instagram, Youtube, Twitter, Linkedin, Github, Fingerprint, Calendar, ArrowUp } from 'lucide-react';
+import { Instagram, Youtube, Twitter, Linkedin, Github, Fingerprint } from 'lucide-react';
 
-interface FooterProps {
-  onOpenBooking: () => void;
-}
-
-export default function Footer({ onOpenBooking }: FooterProps) {
-  const handleLinkClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      const topOffset = element.getBoundingClientRect().top + window.scrollY - 80;
-      window.scrollTo({ top: topOffset, behavior: 'smooth' });
-    }
-  };
-
+export default function Footer() {
   const socialLinks = [
     { name: 'Instagram', icon: <Instagram className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_INSTAGRAM || 'https://instagram.com', color: 'hover:text-[#E1306C] hover:bg-[#E1306C]/10 hover:border-[#E1306C]/30' },
     { name: 'YouTube', icon: <Youtube className="h-5 w-5" />, href: (import.meta as any).env.VITE_SOCIAL_YOUTUBE || 'https://youtube.com', color: 'hover:text-[#FF0000] hover:bg-[#FF0000]/10 hover:border-[#FF0000]/30' },
@@ -29,7 +15,7 @@ export default function Footer({ onOpenBooking }: FooterProps) {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
           {/* Brand details */}
-          <div className="md:col-span-5 space-y-4">
+          <div className="md:col-span-8 space-y-4">
             <a
               href="#"
               onClick={(e) => {
@@ -40,60 +26,13 @@ export default function Footer({ onOpenBooking }: FooterProps) {
             >
               Ayush Automation Lab
             </a>
-            <p className="text-sm text-on-surface-variant leading-relaxed max-w-sm font-medium">
+            <p className="text-sm text-on-surface-variant leading-relaxed max-w-xl font-medium">
               Empowering global operations through custom automation architectures, production AI systems, and robust Python orchestration with surgical precision.
             </p>
           </div>
 
-          <div className="md:col-span-1"></div>
-
-          {/* Company links */}
-          <div className="md:col-span-3 space-y-4">
-            <h4 className="font-space text-xs font-bold text-on-surface uppercase tracking-widest">
-              Quick Links
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <a
-                  href="#services"
-                  onClick={(e) => handleLinkClick(e, '#services')}
-                  className="text-xs text-on-surface-variant hover:text-primary transition-colors font-semibold uppercase tracking-wider"
-                >
-                  Services
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#expertise"
-                  onClick={(e) => handleLinkClick(e, '#expertise')}
-                  className="text-xs text-on-surface-variant hover:text-primary transition-colors font-semibold uppercase tracking-wider"
-                >
-                  Expertise
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#process"
-                  onClick={(e) => handleLinkClick(e, '#process')}
-                  className="text-xs text-on-surface-variant hover:text-primary transition-colors font-semibold uppercase tracking-wider"
-                >
-                  Process
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#contact"
-                  onClick={(e) => handleLinkClick(e, '#contact')}
-                  className="text-xs text-on-surface-variant hover:text-primary transition-colors font-semibold uppercase tracking-wider"
-                >
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-
           {/* Connect links */}
-          <div className="md:col-span-3 space-y-4">
+          <div className="md:col-span-4 space-y-4">
             <h4 className="font-space text-xs font-bold text-on-surface uppercase tracking-widest">
               Connect With Us
             </h4>

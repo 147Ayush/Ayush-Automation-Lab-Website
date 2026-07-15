@@ -97,14 +97,14 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
             reply_to: email,
 
             // Recipient routing fallbacks in case template uses dynamic recipient email
-            to_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            admin_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            receiver_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            owner_email: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            email_to: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
-            recipient: 'ayushsoni07@ayushautomation.com, ayushsoni07@ayushautomationlab.com',
+            to_email: 'ayushsoni07@ayushautomation.com',
+            to: 'ayushsoni07@ayushautomation.com',
+            admin_email: 'ayushsoni07@ayushautomation.com',
+            recipient_email: 'ayushsoni07@ayushautomation.com',
+            receiver_email: 'ayushsoni07@ayushautomation.com',
+            owner_email: 'ayushsoni07@ayushautomation.com',
+            email_to: 'ayushsoni07@ayushautomation.com',
+            recipient: 'ayushsoni07@ayushautomation.com',
 
             // Multi-variable fallbacks for client info in templates
             client_name: name,

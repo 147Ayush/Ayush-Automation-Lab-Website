@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ServicesSection from './components/ServicesSection';
@@ -10,7 +11,7 @@ import BookingModal from './components/BookingModal';
 import AIChatDrawer from './components/AIChatDrawer';
 import ServiceInquiryModal from './components/ServiceInquiryModal';
 import { Service } from './types';
-import { Bot, Sparkles } from 'lucide-react';
+import { Bot, Sparkles, MessageSquare } from 'lucide-react';
 
 export default function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -18,6 +19,14 @@ export default function App() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isServiceInquiryOpen, setIsServiceInquiryOpen] = useState(false);
   const [selectedServiceForInquiry, setSelectedServiceForInquiry] = useState<Service | null>(null);
+  const [showSoonToast, setShowSoonToast] = useState(false);
+
+  const handleChatClick = () => {
+    setShowSoonToast(true);
+    setTimeout(() => {
+      setShowSoonToast(false);
+    }, 4000);
+  };
 
   const handleOpenBooking = (serviceName?: string) => {
     setBookingPreset(serviceName);
@@ -64,7 +73,7 @@ export default function App() {
       </main>
 
       {/* Footer Details */}
-      <Footer onOpenBooking={() => handleOpenBooking()} />
+      <Footer />
 
       {/* Modals & Slideouts */}
       <BookingModal
@@ -88,10 +97,32 @@ export default function App() {
         onClose={() => setIsChatOpen(false)}
       />
 
+      {/* Floating alert toast */}
+      <AnimatePresence>
+        {showSoonToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-24 right-6 z-100 bg-white border-2 border-primary/20 shadow-2xl rounded-2xl p-4 max-w-sm flex items-start gap-3 text-left"
+          >
+            <div className="bg-primary/10 text-primary p-2 rounded-xl border border-primary/20 shrink-0">
+              <MessageSquare className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h4 className="font-space font-bold text-xs text-on-surface">AI Assistant Upgrade</h4>
+              <p className="text-[11px] text-on-surface-variant font-medium mt-1 leading-relaxed">
+                This feature will be available soon! We are upgrading our custom AI automation assistant with advanced workflows.
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Permanent floating AI assistant bubble */}
       <div className="fixed bottom-6 right-6 z-90">
         <button
-          onClick={() => setIsChatOpen(true)}
+          onClick={handleChatClick}
           className="bg-primary text-white p-4 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_35px_rgba(0,42,198,0.35)] hover:scale-105 active:scale-95 transition-all flex items-center justify-center relative cursor-pointer group"
           title="Chat with Automation Lab AI"
           id="floating-ai-chat-bubble"
