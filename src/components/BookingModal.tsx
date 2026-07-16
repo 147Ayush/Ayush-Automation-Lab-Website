@@ -50,12 +50,24 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
         setError('Please enter your full name.');
         return false;
       }
-      if (!email.trim() || !email.includes('@')) {
-        setError('Please enter a valid email address.');
+      
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!email.trim() || !emailRegex.test(email.trim())) {
+        setError('Please enter a valid email address (e.g., name@example.com).');
         return false;
       }
-      if (!phone.trim() || phone.trim().length < 8) {
-        setError('Please enter a valid contact number.');
+
+      const digitsOnly = phone.replace(/\D/g, '');
+      if (!phone.trim()) {
+        setError('Please enter your contact number.');
+        return false;
+      }
+      if (!/^[0-9\s\-()+]+$/.test(phone)) {
+        setError('Contact number must only contain digits, spaces, dashes, or parentheses.');
+        return false;
+      }
+      if (digitsOnly.length < 10 || digitsOnly.length > 11) {
+        setError('Contact number must be 10 or 11 digits long.');
         return false;
       }
     } else if (currentStep === 2) {
@@ -424,6 +436,12 @@ export default function BookingModal({ isOpen, onClose, initialService }: Bookin
                               />
                             </div>
                           </div>
+
+                          {/* Validation Note */}
+                          <p className="text-[11px] text-on-surface-variant/80 bg-slate-50/70 p-2.5 rounded-xl border border-outline-variant/40 flex items-start gap-2 font-medium -mt-1 leading-relaxed">
+                            <span className="text-primary text-xs mt-0.5">ℹ️</span>
+                            <span>Please provide a valid email format (e.g. name@domain.com) and a correct contact number (10 to 11 digits) so we can securely reach back.</span>
+                          </p>
 
                           {/* Company Name */}
                           <div className="flex flex-col gap-1.5">

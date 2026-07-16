@@ -51,8 +51,26 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phone || !requirements) {
+    if (!name.trim() || !email.trim() || !phone.trim() || !requirements.trim()) {
       setError('Please fill in all required fields.');
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address (e.g., name@example.com).');
+      return;
+    }
+
+    // Phone format and length validation
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (!/^[0-9\s\-()+]+$/.test(phone)) {
+      setError('Contact number must only contain digits, spaces, dashes, or parentheses.');
+      return;
+    }
+    if (digitsOnly.length < 10 || digitsOnly.length > 11) {
+      setError('Contact number must be 10 or 11 digits long.');
       return;
     }
 
@@ -338,6 +356,14 @@ export default function ServiceInquiryModal({ isOpen, onClose, service }: Servic
                       className="flex-1 min-w-0 px-4 py-2.5 text-sm rounded-xl border border-outline-variant/60 bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-medium"
                     />
                   </div>
+                </div>
+
+                {/* Validation Note */}
+                <div className="md:col-span-2">
+                  <p className="text-[11px] text-on-surface-variant/80 bg-slate-50/70 p-2.5 rounded-xl border border-outline-variant/40 flex items-start gap-2 font-medium -mt-1 leading-relaxed">
+                    <span className="text-primary text-xs mt-0.5">ℹ️</span>
+                    <span>Please provide a valid email structure (e.g. name@domain.com) and a correct contact number (10 to 11 digits) so we can securely reach back.</span>
+                  </p>
                 </div>
 
                 {/* Service Selection Dropdown */}

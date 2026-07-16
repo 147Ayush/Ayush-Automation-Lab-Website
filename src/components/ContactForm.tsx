@@ -30,10 +30,29 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phone || !message) {
+    if (!name.trim() || !email.trim() || !phone.trim() || !message.trim()) {
       setError('Please fill in all required fields.');
       return;
     }
+
+    // Email format validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address (e.g., name@example.com).');
+      return;
+    }
+
+    // Phone format and length validation
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (!/^[0-9\s\-()+]+$/.test(phone)) {
+      setError('Contact number must only contain digits, spaces, dashes, or parentheses.');
+      return;
+    }
+    if (digitsOnly.length < 10 || digitsOnly.length > 11) {
+      setError('Contact number must be 10 or 11 digits long.');
+      return;
+    }
+
     setError('');
     setIsSubmitting(true);
 
@@ -354,6 +373,12 @@ export default function ContactForm({ onOpenBooking }: ContactFormProps) {
                     </div>
                   </div>
                 </div>
+
+                {/* Validation Note */}
+                <p className="text-[11px] text-on-surface-variant/80 bg-slate-50/70 p-2.5 rounded-xl border border-outline-variant/40 flex items-start gap-2 font-medium -mt-1 leading-relaxed">
+                  <span className="text-primary text-xs mt-0.5">ℹ️</span>
+                  <span>Please provide a valid email structure (e.g. name@domain.com) and a correct contact number (10 to 11 digits) so we can securely reach back.</span>
+                </p>
 
                 {/* Message */}
                 <div className="flex flex-col gap-1.5">
